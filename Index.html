@@ -1,146 +1,218 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-<meta charset="utf-8"/>
-<meta name="viewport" content="width=device-width,initial-scale=1"/>
-<title>Lexio 60 — 해/달/별/구름</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lexio 60</title>
 <style>
-:root{--bg:#0b1020;--panel:#111735;--muted:#aeb8d1;--ring:#86a5ff;--ok:#2ecc71;--warn:#f1c40f;--danger:#ff4d4d}
-*{box-sizing:border-box}
-body{margin:0;background:var(--bg);color:#fff;font-family:system-ui,-apple-system,Segoe UI,Roboto,"Noto Sans KR",sans-serif}
-header{display:flex;justify-content:space-between;align-items:center;padding:14px 18px;border-bottom:1px solid #1a2250}
-header h1{margin:0;font-size:18px}
-header .muted{color:var(--muted);font-size:12px}
-main{max-width:1100px;margin:0 auto;padding:14px}
-.card{background:var(--panel);border:1px solid #1a2250;border-radius:16px;padding:14px;box-shadow:0 8px 24px rgba(0,0,0,.25)}
-.stack{display:flex;flex-direction:column;gap:10px}
-.row{display:flex;gap:12px;flex-wrap:wrap;align-items:center}
-select,button{appearance:none;border-radius:12px;border:1px solid #2b3a7a;background:#121b45;padding:9px 12px;color:#fff;font-weight:600;cursor:pointer}
-button.primary{background:linear-gradient(180deg,#3858ff,#2743e6);border-color:#3f61ff}
-button.ghost{background:#0f173f}
-button.danger{background:#3b1230;border-color:#6a1a49}
-.pill{display:inline-block;padding:4px 10px;border-radius:999px;border:1px solid #2b3a7a;background:#0e1540;color:#d8e0ff;font-size:12px}
-.tiles{display:flex;flex-wrap:wrap;gap:8px}
-.tile{min-width:56px;min-height:44px;padding:8px 10px;border-radius:12px;border:1px solid #2a3980;background:#0e163f;display:inline-flex;gap:6px;align-items:center;justify-content:center;cursor:pointer;transition:transform .08s}
-.tile:hover{transform:translateY(-2px)}
-.tile.selected{outline:3px solid var(--ring);box-shadow:0 0 0 2px #23306a inset}
-.rank{font-weight:800;font-variant-numeric:tabular-nums}
-.suit{font-size:16px}
-.lead{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
-.lead-type{font-size:12px;padding:4px 8px;border-radius:8px;border:1px solid #324393;background:#0f174a}
-.log{height:220px;overflow:auto;background:#0e1436;border:1px solid #1a2250;border-radius:12px;padding:10px;font-size:12px}
-.log p{margin:0 0 6px 0;color:#cdd6ff}
-.muted{color:var(--muted)}
-.kbd{border:1px solid #2a3980;background:#0e163f;padding:2px 6px;border-radius:6px;font-weight:700}
-.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
-@media (max-width:860px){.grid-2{grid-template-columns:1fr}}
-footer{color:#7f8bb3;text-align:center;padding:18px 0;font-size:12px}
+body {background:#0b1020;color:white;font-family:sans-serif;margin:0;padding:0;}
+header, footer {padding:10px 20px;background:#111735;}
+header h1 {margin:0;font-size:20px;}
+main {padding:20px;max-width:1200px;margin:auto;display:flex;flex-direction:column;gap:20px;}
+.tile {display:inline-block;padding:10px 14px;margin:4px;border-radius:12px;background:#0e163f;border:1px solid #2a3980;cursor:pointer;user-select:none;}
+.tile.selected {outline:3px solid #86a5ff;}
+.row {display:flex;gap:10px;flex-wrap:wrap;}
+.card {background:#111735;padding:14px;border-radius:16px;}
+.button {padding:8px 14px;border:none;border-radius:12px;background:#3858ff;color:white;cursor:pointer;}
+.button.ghost {background:#0f173f;}
+.button.danger {background:#6a1a49;}
+.log {height:200px;overflow:auto;background:#0e1436;border-radius:12px;padding:8px;}
 </style>
 </head>
 <body>
 <header>
-  <div>
-    <h1>Lexio 60</h1>
-    <div class="muted">해>달>별>구름 · 2~4인 · 60장 고정</div>
-  </div>
-  <div id="status" class="pill">대기 중</div>
+<h1>Lexio 60</h1>
 </header>
-<main class="stack">
-  <section class="card stack">
-    <div class="row" style="justify-content:space-between">
-      <div class="stack">
-        <label for="players">플레이어 수</label>
-        <select id="players">
-          <option value="2">2명</option>
-          <option value="3" selected>3명</option>
-          <option value="4">4명</option>
-        </select>
-      </div>
-      <div class="stack">
-        <label for="aiLevel">AI 난이도</label>
-        <select id="aiLevel">
-          <option value="easy">초보</option>
-          <option value="medium" selected>중수</option>
-          <option value="hard">고수</option>
-        </select>
-      </div>
-      <div class="stack" style="gap:8px">
-        <button id="startBtn" class="primary">새 게임 시작</button>
-        <button id="hintBtn" class="ghost">힌트</button>
-        <button id="passBtn" class="ghost">패스</button>
-        <button id="restartBtn" class="danger">재시작</button>
-      </div>
-    </div>
-  </section>
-  <section class="row">
-    <div class="card stack" style="flex:1 1 380px">
-      <div class="lead"><span class="muted">현재 턴:</span> <strong id="turnInfo">-</strong></div>
-      <div class="lead"><span class="muted">테이블 탑:</span> <span id="leadType" class="lead-type">(비어있음)</span></div>
-      <div id="leadTiles" class="tiles"></div>
-    </div>
-    <div class="card stack" style="flex:1 1 380px">
-      <div class="lead"><span class="muted">로그</span></div>
-      <div id="log" class="log" role="log" aria-live="polite"></div>
-    </div>
-  </section>
-  <section class="card stack">
-    <div class="lead"><span class="muted">당신의 패</span><span class="muted" id="handHint"></span></div>
-    <div id="playerHand" class="tiles"></div>
-    <div class="row"><button id="playBtn" class="primary">선택 카드 내기</button></div>
-  </section>
-  <section class="grid-2">
-    <div class="card stack"><span class="muted">플레이어 상태</span><div id="playersState" class="stack"></div></div>
-    <div class="card stack"><span class="muted">조합</span>
-      <ul class="muted" style="margin:0 0 0 18px">
-        <li>1장, 2장(원페어), 3장(트리플), 5장</li>
-        <li>5장: 하이카드 &lt; 원페어 &lt; 투페어 &lt; 트리플 &lt; 스트레이트 &lt; 플러시 &lt; 풀하우스 &lt; 포카드 &lt; 스트레이트 플러시</li>
-        <li>리더가 낸 장수와 동일 장수로만 응수, 더 강해야 함</li>
-      </ul>
-    </div>
-  </section>
+<main>
+<div class="card">
+<label>플레이어 수:
+<select id="playerCount">
+<option value="2">2</option>
+<option value="3" selected>3</option>
+<option value="4">4</option>
+</select>
+</label>
+<label>AI 난이도:
+<select id="aiLevel">
+<option value="easy">초보</option>
+<option value="medium" selected>중수</option>
+<option value="hard">고수</option>
+</select>
+</label>
+<button class="button" id="startBtn">게임 시작</button>
+</div>
+
+<div class="card">
+<h3>테이블</h3>
+<div id="tableTiles" class="row"></div>
+<p id="tableLead">현재 장수/조합: -</p>
+</div>
+
+<div class="card">
+<h3>플레이어 손패</h3>
+<div id="playerHand" class="row"></div>
+<button class="button" id="playBtn">선택 카드 내기</button>
+<button class="button ghost" id="passBtn">패스</button>
+</div>
+
+<div class="card">
+<h3>로그</h3>
+<div id="log" class="log"></div>
+</div>
 </main>
-<footer>© 2025</footer>
+<footer>
+Lexio 60 © 2025
+</footer>
+
 <script>
 const SUITS=["해","달","별","구름"];
-const SUIT_ICON={해:"☀️",달:"🌙",별:"⭐",구름:"☁️"};
-const SVAL={구름:1,별:2,달:3,해:4};
-function log(t){const b=document.getElementById("log");const p=document.createElement("p");p.textContent=t;b.appendChild(p);b.scrollTop=b.scrollHeight}
-function setStatus(t){document.getElementById("status").textContent=t}
-function tileStr(t){return `${SUIT_ICON[t.suit]}${t.num}`}
-function tkey(t){return t.suit+"-"+t.num}
-function cmpTile(a,b){if(a.num!==b.num)return a.num-b.num;return SVAL[a.suit]-SVAL[b.suit]}
-function sortTiles(a){return[...a].sort(cmpTile)}
-function buildDeck(){const d=[];for(const s of SUITS){for(let n=2;n<=16;n++)d.push({suit:s,num:n})}return d}
-function shuffle(a){const r=[...a];for(let i=r.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[r[i],r[j]]=[r[j],r[i]]}return r}
-function combinations(arr,k){const res=[];(function b(i,buf){if(buf.length===k){res.push([...buf]);return}for(let x=i;x<arr.length;x++){buf.push(arr[x]);b(x+1,buf);buf.pop()}})(0,[]);return res}
-function isStraight(nums){const u=[...new Set(nums)].sort((a,b)=>a-b);if(u.length!==5)return false;for(let i=1;i<5;i++)if(u[i]!==u[i-1]+1)return false;return true}
-function fiveRank(tiles){const t=sortTiles(tiles);const nums=t.map(x=>x.num);const suits=t.map(x=>x.suit);const flush=suits.every(s=>s===suits[0]);const straight=isStraight(nums);const counts={};for(const n of nums)counts[n]=(counts[n]||0)+1;const groups=Object.entries(counts).sort((a,b)=>b[1]-a[1]||b[0]-a[0]);if(straight&&flush)return{r:8,k:[nums[4],SVAL[t[4].suit]]};if(groups[0][1]===4){const q=+groups[0][0];const k=nums.filter(n=>n!==q)[0];return{r:7,k:[q,k]}}if(groups[0][1]===3&&groups[1][1]===2){return{r:6,k:[+groups[0][0],+groups[1][0]]}}if(flush)return{r:5,k:[...nums].reverse().concat([SVAL[t[4].suit]])};if(straight)return{r:4,k:[nums[4],SVAL[t[4].suit]]};if(groups[0][1]===3){const q=+groups[0][0];const kick=nums.filter(n=>n!==q).sort((a,b)=>b-a);return{r:3,k:[q,...kick]}}if(groups[0][1]===2&&groups[1][1]===2){const p1=+groups[0][0],p2=+groups[1][0],k=nums.find(n=>n!==p1&&n!==p2);return{r:2,k:[Math.max(p1,p2),Math.min(p1,p2),k]}}if(groups[0][1]===2){const p=+groups[0][0];const kick=nums.filter(n=>n!==p).sort((a,b)=>b-a);const topSuit=Math.max(...tiles.filter(x=>x.num===p).map(x=>SVAL[x.suit]));return{r:1,k:[p,topSuit,...kick]}}return{r:0,k:[...nums].reverse().concat([SVAL[t[4].suit]])}}
-function identifyMeld(tiles){const t=sortTiles(tiles);if(t.length===0)return null;if(t.length===1)return{type:"SINGLE",tiles:t,key:[t[0].num,SVAL[t[0].suit]]};if(t.length===2){if(t[0].num===t[1].num){const topSuit=Math.max(SVAL[t[0].suit],SVAL[t[1].suit]);return{type:"PAIR",tiles:t,key:[t[0].num,topSuit]}}return null}if(t.length===3){if(t[0].num===t[1].num&&t[1].num===t[2].num){const topSuit=Math.max(SVAL[t[0].suit],SVAL[t[1].suit],SVAL[t[2].suit]);return{type:"TRIPLE",tiles:t,key:[t[0].num,topSuit]}}return null}if(t.length===5){const f=fiveRank(t);return{type:"FIVE",tiles:t,key:[f.r,...f.k],meta:f}}return null}
-function compareMeld(a,b){if(a.tiles.length!==b.tiles.length)return null;if(a.type==="FIVE"&&b.type==="FIVE"){for(let i=0;i<Math.max(a.key.length,b.key.length);i++){const da=(a.key[i]||0)-(b.key[i]||0);if(da!==0)return da}return 0}else{return a.key[0]-b.key[0]||a.key[1]-b.key[1]}}
-function allValidMelds(hand,size){const out=[];for(const c of combinations(sortTiles(hand),size)){const m=identifyMeld(c);if(m)out.push(m)}out.sort((x,y)=>compareMeld(x,y));const seen=new Set();const uniq=[];for(const m of out){const k=m.tiles.map(tkey).join("|");if(!seen.has(k)){seen.add(k);uniq.push(m)}}return uniq}
-let players=[],turn=0,table=null,winner=null,selected={},aiLevel="medium";
-function deal(total){let deck=shuffle(buildDeck());let each=60/total;players=[];for(let i=0;i<total;i++){const isHuman=i===0;const name=isHuman?"YOU":`AI ${i}`;const slice=deck.slice(i*each,(i+1)*each);players.push({id:i,name,isHuman,hand:sortTiles(slice),passed:false,isOut:false})}}
-function pickStarter(){const o=players.find(p=>p.hand.some(t=>t.num===2&&t.suit==="해"));return o?o.id:0}
-function startGame(){const total=+document.getElementById("players").value;aiLevel=document.getElementById("aiLevel").value;deal(total);turn=pickStarter();table={currentLeadSize:0,currentTop:null,leaderId:turn};winner=null;for(const p of players){p.passed=false;p.isOut=false}log(`게임 시작 — 시작 리드: ${players[turn].name}`);render();autoIfAI()}
-function tileView(t,clickable){const el=document.createElement("div");el.className="tile";if(!clickable)el.style.cursor="default";const r=document.createElement("span");r.className="rank";r.textContent=t.num;const s=document.createElement("span");s.className="suit";s.textContent=SUIT_ICON[t.suit];el.appendChild(s);el.appendChild(r);return el}
-function render(){document.getElementById("turnInfo").textContent=players[turn]?.name||"-";document.getElementById("leadType").textContent=table.currentTop?(table.currentTop.type==="FIVE"?`5장:${["하이","원페","투페","트리","스트","플러","풀하","포카","스플"][table.currentTop.key[1]||0]}`:`${table.currentTop.type} (${table.currentLeadSize})`):"(비어있음)";const leadBox=document.getElementById("leadTiles");leadBox.innerHTML="";if(table.currentTop){for(const t of table.currentTop.tiles){leadBox.appendChild(tileView(t,false))}}const handBox=document.getElementById("playerHand");handBox.innerHTML="";const me=players[0];for(const t of me.hand){const el=tileView(t,true);if(selected[tkey(t)])el.classList.add("selected");el.onclick=()=>toggleSelect(t);handBox.appendChild(el)}const ps=document.getElementById("playersState");ps.innerHTML="";for(const p of players){const div=document.createElement("div");div.className="row";div.innerHTML=`<span>${p.name}</span><span class="muted"> | 손패 ${p.hand.length}장 ${p.passed?"· PASS":""}</span>`;ps.appendChild(div)}setStatus(winner?"라운드 종료":"진행 중");document.getElementById("handHint").textContent=table.currentTop?`(${table.currentLeadSize}장 핸드 상회 필요)`: "(리드 가능)"}
-function toggleSelect(t){const k=tkey(t);selected[k]=!selected[k];render()}
-function removeTiles(p,tiles){for(const t of tiles){const i=p.hand.findIndex(x=>x.suit===t.suit&&x.num===t.num);if(i>=0)p.hand.splice(i,1)}}
-function clearSelection(){selected={};render()}
-function playSelected(){if(winner)return;const me=players[0];if(turn!==me.id)return;const tiles=me.hand.filter(x=>selected[tkey(x)]);const m=identifyMeld(tiles);if(!m){log("유효한 조합이 아닙니다.");return}if(table.currentTop){if(m.tiles.length!==table.currentLeadSize){log("현재 장수와 동일해야 합니다.");return}if(compareMeld(m,table.currentTop)<=0){log("현재 탑보다 강해야 합니다.");return}}removeTiles(me,m.tiles);me.passed=false;if(!table.currentTop){table.currentLeadSize=m.tiles.length;table.leaderId=me.id}table.currentTop=m;clearSelection();log(`YOU ▶ ${m.type} — ${m.tiles.map(tileStr).join(", ")}`);if(me.hand.length===0){me.isOut=true;endRound(me);return}nextTurn()}
-function passTurn(){if(winner)return;const p=players[turn];p.passed=true;log(`${p.name} — PASS`);if(table.currentTop){const allPassed=players.filter(pp=>!pp.isOut&&pp.id!==table.leaderId).every(pp=>pp.passed);if(allPassed){log("모두 패스. 테이블 클리어, 선 유지");for(const pl of players)pl.passed=false;table.currentTop=null;table.currentLeadSize=0;turn=table.leaderId;render();autoIfAI();return}}nextTurn()}
-function nextTurn(){const alive=players.filter(p=>!p.isOut).map(p=>p.id);do{turn=(turn+1)%players.length}while(!alive.includes(turn));render();autoIfAI()}
-function autoIfAI(){const p=players[turn];if(!p||p.isHuman)return;setTimeout(()=>aiAct(p),500)}
-function pickMinimalWin(p,opts){if(!table.currentTop)return opts[0]||null;const wins=opts.filter(m=>compareMeld(m,table.currentTop)>0);return wins[0]||null}
-function pickRandomWin(p,opts){if(!table.currentTop)return opts.length?opts[Math.floor(Math.random()*opts.length)]:null;const wins=opts.filter(m=>compareMeld(m,table.currentTop)>0);return wins.length?wins[Math.floor(Math.random()*wins.length)]:null}
-function pickStrongLead(p){const f5=allValidMelds(p.hand,5).slice(-1)[0];if(f5)return f5;const t3=allValidMelds(p.hand,3).slice(-1)[0];if(t3)return t3;const p2=allValidMelds(p.hand,2).slice(-1)[0];if(p2)return p2;const s1=allValidMelds(p.hand,1).slice(-1)[0];return s1||null}
-function aiAct(p){let cand=null;if(!table.currentTop){if(aiLevel==="easy"){const pools=[1,2,3,5].map(k=>allValidMelds(p.hand,k)).flat();cand=pools.length?pools[Math.floor(Math.random()*pools.length)]:null}else if(aiLevel==="medium"){cand=pickMinimalWin(p,allValidMelds(p.hand,1))||pickMinimalWin(p,allValidMelds(p.hand,2))||pickMinimalWin(p,allValidMelds(p.hand,3))||pickMinimalWin(p,allValidMelds(p.hand,5))}else{cand=pickStrongLead(p)}}else{if(aiLevel==="easy"){cand=pickRandomWin(p,allValidMelds(p.hand,table.currentLeadSize))}else if(aiLevel==="medium"){cand=pickMinimalWin(p,allValidMelds(p.hand,table.currentLeadSize))}else{const opts=allValidMelds(p.hand,table.currentLeadSize);const wins=opts.filter(m=>compareMeld(m,table.currentTop)>0);wins.sort((a,b)=>compareMeld(a,b));cand=wins[0]||null;if(!cand&&table.currentLeadSize===1){const low=allValidMelds(p.hand,1)[0];cand=low||null}}}if(cand){removeTiles(p,cand.tiles);p.passed=false;if(!table.currentTop){table.currentLeadSize=cand.tiles.length;table.leaderId=p.id}table.currentTop=cand;log(`${p.name} ▶ ${cand.type} — ${cand.tiles.map(tileStr).join(", ")}`);if(p.hand.length===0){p.isOut=true;endRound(p);return}nextTurn()}else{passTurn()}}
-function endRound(outPlayer){winner=outPlayer;log(`라운드 종료 — 승자: ${outPlayer.name}`);setStatus("라운드 종료");render()}
-document.getElementById("startBtn").onclick=startGame
-document.getElementById("playBtn").onclick=playSelected
-document.getElementById("passBtn").onclick=passTurn
-document.getElementById("restartBtn").onclick=()=>location.reload()
-document.getElementById("hintBtn").onclick=()=>{if(winner)return;const me=players[0];if(!me||turn!==me.id)return;let m=null;if(table.currentTop)m=allValidMelds(me.hand,table.currentLeadSize).find(x=>compareMeld(x,table.currentTop)>0)||null;else m=allValidMelds(me.hand,1)[0]||allValidMelds(me.hand,2)[0]||allValidMelds(me.hand,3)[0]||allValidMelds(me.hand,5)[0];if(!m){log("낼 수 있는 패가 없습니다.");return}selected={};for(const t of m.tiles)selected[tkey(t)]=true;render()}
+const SUIT_SYMBOL={해:"☀️",달:"🌙",별:"⭐",구름:"☁️"};
+const SUIT_VALUE={구름:1,별:2,달:3,해:4};
+
+let players=[],turn=0,table=null,winner=null,selectedTiles={};
+let aiLevel="medium";
+
+function log(msg){const b=document.getElementById("log");const p=document.createElement("p");p.textContent=msg;b.appendChild(p);b.scrollTop=b.scrollHeight;}
+
+function createDeck(){
+  const deck=[];
+  for(const s of SUITS) for(let n=2;n<=16;n++) deck.push({suit:s,num:n});
+  return deck.slice(0,60);
+}
+
+function shuffle(deck){let d=[...deck];for(let i=d.length-1;i>0;i--){let j=Math.floor(Math.random()*(i+1));[d[i],d[j]]=[d[j],d[i]]}return d;}
+
+function deal(playerCount){
+  let deck=shuffle(createDeck());
+  let per=Math.floor(60/playerCount);
+  players=[];
+  for(let i=0;i<playerCount;i++){
+    players.push({
+      id:i,
+      name:i===0?"YOU":`AI ${i}`,
+      isHuman:i===0,
+      hand:deck.slice(i*per,(i+1)*per),
+      passed:false,
+      isOut:false,
+      lastPlay:null
+    });
+  }
+}
+
+function pickStarter(){
+  const p=players.find(p=>p.hand.some(c=>c.num===2&&c.suit==="해"));
+  return p?p.id:0;
+}
+
+function sortHand(hand){return hand.slice().sort((a,b)=>b.num-a.num||SUIT_VALUE[b.suit]-SUIT_VALUE[a.suit]);}
+
+function renderHand(){
+  const handDiv=document.getElementById("playerHand");
+  handDiv.innerHTML="";
+  const me=players[0];
+  for(const t of me.hand){
+    const div=document.createElement("div");
+    div.className="tile";
+    if(selectedTiles[`${t.suit}-${t.num}`]) div.classList.add("selected");
+    div.textContent=`${SUIT_SYMBOL[t.suit]}${t.num}`;
+    div.onclick=()=>{const k=`${t.suit}-${t.num}`;selectedTiles[k]=!selectedTiles[k];renderHand();};
+    handDiv.appendChild(div);
+  }
+}
+
+function renderTable(){
+  const tableDiv=document.getElementById("tableTiles");
+  tableDiv.innerHTML="";
+  if(table?.currentTop) for(const t of table.currentTop.tiles){
+    const div=document.createElement("div");
+    div.className="tile";
+    div.textContent=`${SUIT_SYMBOL[t.suit]}${t.num}`;
+    tableDiv.appendChild(div);
+  }
+  document.getElementById("tableLead").textContent=table?.currentTop?`장수:${table.currentTop.tiles.length}, 조합:${table.currentTop.type}`:"-";
+}
+
+function renderAll(){
+  renderHand();
+  renderTable();
+}
+
+function identifyMeld(tiles){
+  if(tiles.length===1) return {type:"SINGLE",tiles,key:[tiles[0].num,SUIT_VALUE[tiles[0].suit]]};
+  if(tiles.length===2&&tiles[0].num===tiles[1].num) return {type:"PAIR",tiles,key:[tiles[0].num,Math.max(SUIT_VALUE[tiles[0].suit],SUIT_VALUE[tiles[1].suit])]};
+  if(tiles.length===3&&tiles.every(c=>c.num===tiles[0].num)) return {type:"TRIPLE",tiles,key:[tiles[0].num,Math.max(...tiles.map(c=>SUIT_VALUE[c.suit]))]};
+  return null;
+}
+
+function compareMeld(a,b){
+  if(a.tiles.length!==b.tiles.length) return null;
+  for(let i=0;i<a.key.length;i++){
+    if(a.key[i]!==b.key[i]) return a.key[i]-b.key[i];
+  }
+  return 0;
+}
+
+function nextTurn(){
+  const alive=players.filter(p=>!p.isOut).map(p=>p.id);
+  do{turn=(turn+1)%players.length;}while(!alive.includes(turn));
+  renderAll();
+  if(!players[turn].isHuman) setTimeout(()=>aiPlay(players[turn]),500);
+}
+
+function aiPlay(player){
+  const cand=player.hand[0]?identifyMeld([player.hand[0]]):null;
+  if(cand){playTiles(player,cand.tiles,cand.type);}else{passTurn();}
+}
+
+function playTiles(player,tiles,type){
+  player.hand=player.hand.filter(c=>!tiles.includes(c));
+  const meld={type,tiles};
+  table.currentTop=meld;
+  player.lastPlay=meld;
+  player.passed=false;
+  log(`${player.name} ▶ ${type} : ${tiles.map(c=>`${SUIT_SYMBOL[c.suit]}${c.num}`).join(",")}`);
+  if(player.hand.length===0){player.isOut=true;endGame(player);}
+  else nextTurn();
+}
+
+function humanPlay(){
+  const me=players[0];
+  const tiles=me.hand.filter(c=>selectedTiles[`${c.suit}-${c.num}`]);
+  if(tiles.length===0){log("카드를 선택해주세요."); return;}
+  const meld=identifyMeld(tiles);
+  if(!meld){log("유효한 조합이 아닙니다."); return;}
+  playTiles(me,tiles,meld.type);
+  selectedTiles={};
+}
+
+function passTurn(){
+  const p=players[turn];
+  p.passed=true;
+  log(`${p.name} ▶ PASS`);
+  nextTurn();
+}
+
+function startGame(){
+  const pc=+document.getElementById("playerCount").value;
+  aiLevel=document.getElementById("aiLevel").value;
+  deal(pc);
+  turn=pickStarter();
+  table={currentTop:null,leaderId:turn};
+  winner=null;
+  log("게임 시작");
+  renderAll();
+  if(!players[turn].isHuman) setTimeout(()=>aiPlay(players[turn]),500);
+}
+
+function endGame(player){
+  winner=player;
+  log(`게임 종료! 승자: ${player.name}`);
+  alert(`게임 종료! 승자: ${player.name}`);
+}
+
+document.getElementById("startBtn").onclick=startGame;
+document.getElementById("playBtn").onclick=humanPlay;
+document.getElementById("passBtn").onclick=passTurn;
 </script>
 </body>
-                                                                </html>
+</html>
